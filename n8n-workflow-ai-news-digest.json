@@ -83,7 +83,7 @@
     },
     {
       "parameters": {
-        "url": "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
+        "url": "https://www.theverge.com/rss/index.xml",
         "options": {}
       },
       "type": "n8n-nodes-base.rssFeedRead",
@@ -93,9 +93,9 @@
         650
       ],
       "id": "rss-verge-ai",
-      "name": "The Verge AI",
+      "name": "The Verge",
       "notesInFlow": true,
-      "notes": "The Verge AI 뉴스"
+      "notes": "The Verge 전체 뉴스 (AI 포함)"
     },
     {
       "parameters": {
@@ -374,7 +374,7 @@
             "index": 0
           },
           {
-            "node": "The Verge AI",
+            "node": "The Verge",
             "type": "main",
             "index": 0
           },
@@ -405,7 +405,7 @@
             "index": 0
           },
           {
-            "node": "The Verge AI",
+            "node": "The Verge",
             "type": "main",
             "index": 0
           },
@@ -450,7 +450,7 @@
         ]
       ]
     },
-    "The Verge AI": {
+    "The Verge": {
       "main": [
         [
           {

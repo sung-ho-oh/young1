@@ -14,7 +14,7 @@
   - TechCrunch AI
   - VentureBeat AI
   - MIT Technology Review
-  - The Verge AI
+  - The Verge
   - AI News
 
 - 🔍 **AI 기반 스마트 필터링**
