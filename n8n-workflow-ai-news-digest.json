@@ -1,0 +1,585 @@
+{
+  "name": "AI News Daily Digest - Agent AI & Vibe Coding",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -800,
+        500
+      ],
+      "id": "schedule-trigger-001",
+      "name": "Every day at 10 AM",
+      "notesInFlow": true,
+      "notes": "매일 오전 10시 실행"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        300
+      ],
+      "id": "manual-trigger-001",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        200
+      ],
+      "id": "rss-techcrunch-ai",
+      "name": "TechCrunch AI",
+      "notesInFlow": true,
+      "notes": "TechCrunch AI 뉴스"
+    },
+    {
+      "parameters": {
+        "url": "https://venturebeat.com/category/ai/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        350
+      ],
+      "id": "rss-venturebeat-ai",
+      "name": "VentureBeat AI",
+      "notesInFlow": true,
+      "notes": "VentureBeat AI 뉴스"
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        500
+      ],
+      "id": "rss-mit-ai",
+      "name": "MIT Tech Review AI",
+      "notesInFlow": true,
+      "notes": "MIT Technology Review AI"
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        650
+      ],
+      "id": "rss-verge-ai",
+      "name": "The Verge AI",
+      "notesInFlow": true,
+      "notes": "The Verge AI 뉴스"
+    },
+    {
+      "parameters": {
+        "url": "https://www.artificialintelligence-news.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        800
+      ],
+      "id": "rss-ai-news",
+      "name": "AI News",
+      "notesInFlow": true,
+      "notes": "AI News 전문 사이트"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        -200,
+        500
+      ],
+      "id": "merge-feeds-001",
+      "name": "Merge All RSS Feeds"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "dateTime": [
+            {
+              "value1": "={{ $json.isoDate || $json.pubDate }}",
+              "operation": "after",
+              "value2": "={{ $now.minus(1, 'days').toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        50,
+        500
+      ],
+      "id": "filter-recent-001",
+      "name": "Filter Last 24h",
+      "notesInFlow": true,
+      "notes": "최근 24시간 뉴스만 필터링"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "format-title",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "format-url",
+              "name": "url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "format-date",
+              "name": "published_date",
+              "value": "={{ $json.isoDate || $json.pubDate }}",
+              "type": "string"
+            },
+            {
+              "id": "format-content",
+              "name": "content",
+              "value": "={{ $json.contentSnippet || $json.content || $json.description || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        500
+      ],
+      "id": "format-articles-001",
+      "name": "Format Articles",
+      "notesInFlow": true,
+      "notes": "기사 데이터 포맷팅"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        550,
+        500
+      ],
+      "id": "aggregate-articles-001",
+      "name": "Aggregate Articles"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        700
+      ],
+      "id": "openai-model-001",
+      "name": "OpenAI GPT-4o",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "Yff5Gi5xySCg4Tg1",
+          "name": "OpenAi account"
+        }
+      },
+      "notes": "GPT-4o 모델 사용"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI news analyst specializing in Agent AI, Agentic AI, and Vibe Coding trends.\n\nAnalyze the following articles and perform these tasks:\n\n1. **Filter & Select**: From all the articles provided, identify and select the TOP 10 most impactful and important articles specifically related to:\n   - Agent AI (AI agents, autonomous agents, multi-agent systems)\n   - Agentic AI (agentic workflows, agentic behavior, agentic capabilities)\n   - Vibe Coding (AI-assisted coding, coding with vibes, natural language programming)\n\n2. **Ranking Criteria**: Prioritize articles based on:\n   - Relevance to the three topics above\n   - Impact and importance (major announcements, breakthrough research, industry trends)\n   - Recency and timeliness\n   - Source credibility\n\n3. **Korean Summary**: For each of the TOP 10 selected articles, provide:\n   - Korean title (한글 제목)\n   - Korean summary (2-3 sentences in Korean explaining the key points)\n   - Original article URL\n   - Why this article is important (in Korean)\n\n4. **Output Format**: Format your response EXACTLY as follows in Korean:\n\n---\n# 🤖 오늘의 AI 에이전트 & Vibe Coding 뉴스 다이제스트\n📅 날짜: {{ $now.format('YYYY년 MM월 DD일') }}\n\n## 📰 TOP 10 주요 기사\n\n### 1. [기사 제목 한글]\n**요약**: [2-3문장으로 된 한글 요약]\n\n**왜 중요한가**: [이 기사가 중요한 이유를 한글로 설명]\n\n🔗 **원문 링크**: [URL]\n\n---\n\n### 2. [기사 제목 한글]\n...\n\n(Repeat for all 10 articles)\n\n---\n\n## 💡 오늘의 인사이트\n[전체 뉴스에서 발견한 주요 트렌드나 패턴을 2-3문장으로 한글로 요약]\n\n---\n\nHere are the articles to analyze:\n\n{{ JSON.stringify($json.articles, null, 2) }}\n\nIMPORTANT: \n- Only select articles that are DIRECTLY related to Agent AI, Agentic AI, or Vibe Coding\n- If there are fewer than 10 relevant articles, only include the relevant ones\n- All summaries and explanations must be in Korean\n- Keep summaries concise but informative",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        500
+      ],
+      "id": "ai-analyst-agent-001",
+      "name": "AI News Analyst Agent",
+      "notesInFlow": true,
+      "notes": "AI 뉴스 분석 및 한국어 요약"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-content",
+              "name": "email_content",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1050,
+        500
+      ],
+      "id": "format-email-001",
+      "name": "Format Email Content"
+    },
+    {
+      "parameters": {
+        "sendTo": "multiosh@gmail.com",
+        "subject": "=🤖 AI 뉴스 다이제스트 - {{ $now.format('YYYY년 MM월 DD일') }}",
+        "emailType": "text",
+        "message": "={{ $json.email_content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1300,
+        500
+      ],
+      "id": "send-email-001",
+      "name": "Send Email via Gmail",
+      "webhookId": "ai-news-digest-email",
+      "notesInFlow": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "w4Ti5gSjhgMiXMjP",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "이메일 발송"
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 AI 뉴스 다이제스트\n\n매일 오전 10시에 Agent AI, Agentic AI, Vibe Coding 관련 최신 뉴스 TOP 10을 선별하여 한국어 요약과 함께 이메일로 전송합니다.",
+        "height": 280,
+        "width": 380,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        140
+      ],
+      "id": "sticky-note-main",
+      "name": "Sticky Note - Main"
+    },
+    {
+      "parameters": {
+        "content": "## 📡 RSS 뉴스 소스\n\n5개의 주요 AI 뉴스 소스에서 최신 기사를 수집합니다:\n- TechCrunch AI\n- VentureBeat AI\n- MIT Technology Review\n- The Verge AI\n- AI News",
+        "height": 320,
+        "width": 280,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        100
+      ],
+      "id": "sticky-note-sources",
+      "name": "Sticky Note - Sources"
+    },
+    {
+      "parameters": {
+        "content": "## 🔍 AI 분석 및 선별\n\nGPT-4o를 사용하여:\n1. Agent AI/Agentic AI/Vibe Coding 관련 기사 필터링\n2. 가장 영향력 있는 TOP 10 선정\n3. 한국어 요약 생성\n4. 중요도 설명 추가",
+        "height": 320,
+        "width": 320,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        140
+      ],
+      "id": "sticky-note-ai",
+      "name": "Sticky Note - AI Analysis"
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ 설정 방법\n\n1. OpenAI API 키 설정\n2. Gmail 계정 연결\n3. 이메일 주소 변경 (Send Email via Gmail 노드)\n4. 원하는 시간으로 스케줄 조정",
+        "height": 240,
+        "width": 280,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        140
+      ],
+      "id": "sticky-note-setup",
+      "name": "Sticky Note - Setup"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every day at 10 AM": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "VentureBeat AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MIT Tech Review AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Verge AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "VentureBeat AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MIT Tech Review AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Verge AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch AI": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VentureBeat AI": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS Feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "MIT Tech Review AI": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Verge AI": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS Feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI News": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All RSS Feeds": {
+      "main": [
+        [
+          {
+            "node": "Filter Last 24h",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Last 24h": {
+      "main": [
+        [
+          {
+            "node": "Format Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Articles": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Articles": {
+      "main": [
+        [
+          {
+            "node": "AI News Analyst Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4o": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI News Analyst Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI News Analyst Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email Content": {
+      "main": [
+        [
+          {
+            "node": "Send Email via Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "Asia/Seoul",
+    "executionOrder": "v1"
+  },
+  "versionId": "ai-news-digest-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "ai-news-digest-workflow"
+  },
+  "id": "ai-news-digest-workflow",
+  "tags": [
+    "ai",
+    "news",
+    "agent-ai",
+    "vibe-coding",
+    "daily-digest"
+  ]
+}
