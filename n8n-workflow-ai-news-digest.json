@@ -115,20 +115,6 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll"
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 2.1,
-      "position": [
-        -200,
-        500
-      ],
-      "id": "merge-feeds-001",
-      "name": "Merge All RSS Feeds"
-    },
-    {
-      "parameters": {
         "conditions": {
           "dateTime": [
             {
@@ -435,7 +421,7 @@
       "main": [
         [
           {
-            "node": "Merge All RSS Feeds",
+            "node": "Filter Last 24h",
             "type": "main",
             "index": 0
           }
@@ -446,9 +432,9 @@
       "main": [
         [
           {
-            "node": "Merge All RSS Feeds",
+            "node": "Filter Last 24h",
             "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
@@ -457,7 +443,7 @@
       "main": [
         [
           {
-            "node": "Merge All RSS Feeds",
+            "node": "Filter Last 24h",
             "type": "main",
             "index": 0
           }
@@ -468,25 +454,14 @@
       "main": [
         [
           {
-            "node": "Merge All RSS Feeds",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "AI News": {
-      "main": [
-        [
-          {
-            "node": "Merge All RSS Feeds",
+            "node": "Filter Last 24h",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Merge All RSS Feeds": {
+    "AI News": {
       "main": [
         [
           {
